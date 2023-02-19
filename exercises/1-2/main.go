@@ -11,12 +11,13 @@ func producer(ch chan<- int) {
 		fmt.Println("Produced: ", i)
 		time.Sleep(time.Second)
 	}
+
 }
 
 func comsumer(ch <-chan int) {
-	for {
-		fmt.Println("Consumed", <-ch)
-		time.Sleep(time.Second)
+	ticker := time.NewTicker(time.Second)
+	for range ticker.C {
+		fmt.Println("Consumed: ", <-ch)
 	}
 }
 
