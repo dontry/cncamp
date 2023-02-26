@@ -1,0 +1,31 @@
+# Build stage
+FROM golang:1.19-alpine AS build
+
+# Set the working directory inside the container
+WORKDIR /bin
+
+# Copy the source from the current directory to the working Directory inside the container
+COPY go.mod ./
+
+# Download all the dependencies
+RUN go mod download
+
+# Copy the source from the current directory to the working Directory inside the container
+COPY *.go ./
+
+# Build the Go app
+# Turn off CGO since that can result in dynamic links to libc/libmusl.
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o httpserver .
+
+# Final stage
+FROM scratch
+
+# Copy the Pre-built binary file from the previous stage to /app
+COPY --from=build /bin/httpserver /bin/httpserver
+
+EXPOSE 8080
+
+ENV VERSION=1.0.0
+
+ENTRYPOINT [ "/bin/httpserver" ]
+CMD [ "-verbose"]
