@@ -8,12 +8,13 @@ import (
 )
 
 func main() {
-	http.Handle("/healthz", loggerMiddleware(headerMiddleware(http.HandlerFunc(healthHandler))))
+	os.Setenv("VERSION", "1.0.0")
+	http.HandleFunc("/healthz", loggerMiddleware(headerMiddleware(healthHandler)))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func loggerMiddleware(next http.Handler) http.Handler {
+func loggerMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// write a statement to log response status code
 		writer := &responseStatusWriter{ResponseWriter: w}
@@ -33,7 +34,7 @@ func (w *responseStatusWriter) WriteHeader(statusCode int) {
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
-func headerMiddleware(next http.Handler) http.Handler {
+func headerMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// write request header to response
 		for k, v := range r.Header {
@@ -41,7 +42,7 @@ func headerMiddleware(next http.Handler) http.Handler {
 		}
 		// read environment variable and write it to response
 		w.Header().Set("VERSION", os.Getenv("VERSION"))
-		next.ServeHTTP(w, r)
+		next(w, r)
 	})
 }
 
