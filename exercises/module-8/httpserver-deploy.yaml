@@ -37,5 +37,5 @@ spec:
             preStop:
               exec:
                 command: [ "/bin/sh","-c","kill -SIGTERM $(pidof go-app)" ]
-
+      terminationGracePeriodSeconds: 30
 
