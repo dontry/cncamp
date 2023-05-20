@@ -1,4 +1,4 @@
-module github.com/dontry/cncamp/exercises/module-10/httpserver
+module github.com/dontry/cncamp/exercises/module-10
 
 go 1.19
 

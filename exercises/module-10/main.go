@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/dontry/cncamp/exercises/module-10/httpserver/metrics"
+	"github.com/dontry/cncamp/exercises/module-10/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
