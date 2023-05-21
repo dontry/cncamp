@@ -11,6 +11,7 @@ COPY go.mod ./
 RUN go mod download
 
 # Copy the source code from the current directory to the working Directory inside the container
+COPY metrics ./metrics
 COPY *.go ./
 COPY go.sum ./
 COPY go.mod ./
@@ -27,7 +28,7 @@ FROM scratch
 COPY --from=build /bin/httpserver /bin/httpserver
 
 
-ENV VERSION=1.1.0
+ENV VERSION=0.6.0
 ENV PORT=8080
 
 EXPOSE ${PORT}

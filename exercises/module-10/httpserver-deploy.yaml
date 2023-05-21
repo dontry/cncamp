@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
         - name: httpserver
-          image: dontry/httpserver
-          imagePullPolicy: IfNotPresent
+          image: dontry/httpserver:0.6.0
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           resources:

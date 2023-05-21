@@ -1,59 +1,53 @@
 # httpserver - A simple HTTP server
 
+## New features of httpserver
+	- Add random delay and Prometheus metrics in metricsMiddleware
+	- Logs will also be written to stdout now to be collected by Loki
+
+## Features
+- Collect metrics with Prometheus
+- Collect logs with Loki
+- View various metrics in both Prometheus and Grafana
+- View logs with Loki in Grafana
+
+## Loki-stack installation
+
+### Download loki-stack
+
+```sh
+helm pull grafana/loki-stack
+tar -xvf loki-stack-*.tgz
+cd loki-stack
+```
+
+
+To install loki-stack on Kubernetes v1.22+, we need to change rbac.authorization.k8s.io/v1beta1 to rbac.authorization.k8s.io/v1. Therefore, manual installation is required:
+
+```sh
+grep -rl "rbac.authorization.k8s.io/v1beta1" . | xargs sed -i 's/rbac.authorization.k8s.io\/v1beta1/rbac.authorization.k8s.io\/v1/g'
+ sed s#rbac.authorization.k8s.io/v1beta1#rbac.authorization.k8s.io/v1#g *.yaml
+```
+
+### Install loki locally
+
+```sh
+helm upgrade --install loki ./loki-stack --set grafana.enabled=true,prometheus.enabled=true,prometheus.alertmanager.persistentVolume.enabled=false,prometheus.server.persistentVolume.enabled=false
+```
+
+
+
 ### Deploy the httpserver pod and service
 
 ```sh
-# wait for around 30 seconds for the pod to be ready
-kubectl create -f httpserver-deploy.yaml
-kubectl create -f httpserver-service.yaml
+kubectl apply -f httpserver-deploy.yaml
+kubectl apply -f httpserver-service.yaml
 ```
 
-### Deploy fluentbit to collect logs from httpserver pods
 
-```sh
-kubectl create -f fluentbit.yaml
-```
+### Demo
+Loki logs:
+![logs](images/logs.png)
 
-### View logs in fluentbit pod
+Prometheus metrics:
+![metrics](images/metrics.png)
 
-```sh
-kubectl logs -f fluentbit-xxxxx
-```
-
-### Deploy the ingress and ingress controller
-
-```sh
-# deploy k8s nginx ingress controller
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.0/deploy/static/provider/cloud/deploy.yaml
-```
-
-### Generate key-cert
-
-```sh
-# use openssl (version >= 1.1.1f) on Linux, e.g. Ubuntu 20.04
-# don't run on macOS, which is using LibreSSL
-# instead, you can `brew install openssl` on macOS
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=httpserver.com/O=httpserver" -addext "subjectAltName = DNS:httpserver.com"
-```
-
-### Create secret
-
-```sh
-kubectl create secret tls httpserver-tls --cert=./tls.crt --key=./tls.key
-```
-
-### Deploy the ingress
-
-```sh
-kubectl create -f ingress.yaml
-```
-
-### Test the result
-
-```sh
-# get the ingress controller IP
-kubectl get svc -n ingress-nginx
-
-# test the ingress
-curl -H "Host: httpserver.com" https://{INGRESS_CONTROLLER_IP} -v -k
-```
